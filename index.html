@@ -70,9 +70,10 @@
     /* ── Counter cards ── */
     .counters {
       display: flex;
-      gap: 2rem;
+      gap: 1.5rem;
       flex-wrap: wrap;
       justify-content: center;
+      margin-bottom: 0.5rem;
     }
 
     .counter-card {
@@ -81,14 +82,13 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 20px;
       padding: 1.5rem;
-      width: 300px;
+      width: 280px;
       text-align: center;
       transition: transform 0.2s;
+      position: relative;
     }
 
     .counter-card:hover { transform: translateY(-4px); }
-    .counter-card.a { box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3); }
-    .counter-card.b { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.3); }
 
     .card-label {
       font-size: 1.1rem;
@@ -96,9 +96,6 @@
       margin-bottom: 0.8rem;
       letter-spacing: 1px;
     }
-
-    .counter-card.a .card-label { color: #818cf8; }
-    .counter-card.b .card-label { color: #f472b6; }
 
     .count {
       font-size: 3.5rem;
@@ -130,11 +127,6 @@
 
     button:active { transform: scale(0.92); }
 
-    .counter-card.a button.plus  { background: #6366f1; }
-    .counter-card.a button.minus { background: #4338ca; }
-    .counter-card.b button.plus  { background: #ec4899; }
-    .counter-card.b button.minus { background: #be185d; }
-
     button.reset {
       background: rgba(255, 255, 255, 0.12);
       font-size: 0.8rem;
@@ -156,6 +148,47 @@
       margin-top: 0.3rem;
     }
 
+    .btn-remove-list {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: rgba(255,255,255,0.1);
+      font-size: 0.8rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 8px;
+      opacity: 0.5;
+    }
+
+    .btn-remove-list:hover { opacity: 1; background: #ef4444; }
+
+    /* ── Add list button ── */
+    .add-list-card {
+      background: rgba(255,255,255,0.04);
+      border: 2px dashed rgba(255,255,255,0.15);
+      border-radius: 20px;
+      width: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 180px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .add-list-card:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.3);
+    }
+
+    .add-list-card button {
+      background: none;
+      font-size: 1rem;
+      opacity: 0.6;
+      padding: 1rem 1.5rem;
+    }
+
+    .add-list-card button:hover { opacity: 1; }
+
     /* ── Name lists ── */
     .name-list-section {
       margin-top: 1rem;
@@ -170,7 +203,7 @@
 
     .name-list-section textarea {
       width: 100%;
-      min-height: 120px;
+      min-height: 110px;
       padding: 0.6rem;
       border-radius: 10px;
       border: 1px solid rgba(255,255,255,0.2);
@@ -200,7 +233,7 @@
       padding: 1.5rem 2rem;
       text-align: center;
       width: 100%;
-      max-width: 660px;
+      max-width: 750px;
     }
 
     .results h2 {
@@ -238,23 +271,18 @@
       font-weight: 700;
       font-size: 0.7rem;
       transition: background 0.3s;
-      position: relative;
     }
 
-    .seat.a { background: #6366f1; }
-    .seat.b { background: #ec4899; }
     .seat.empty { background: rgba(255,255,255,0.1); }
 
     .seats-summary {
       display: flex;
       justify-content: center;
-      gap: 2rem;
+      gap: 1.5rem;
+      flex-wrap: wrap;
       margin-top: 0.8rem;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
-
-    .seats-summary .a { color: #818cf8; }
-    .seats-summary .b { color: #f472b6; }
 
     /* ── Elected list ── */
     .elected-list {
@@ -288,8 +316,6 @@
       text-align: center;
     }
 
-    .elected-table td.list-a { color: #818cf8; }
-    .elected-table td.list-b { color: #f472b6; }
     .elected-table tr.swapped { background: rgba(251,191,36,0.12); }
     .elected-table .swap-note { color: #fbbf24; font-size: 0.75rem; }
 
@@ -301,15 +327,13 @@
     }
 
     table.dhondt th, table.dhondt td {
-      padding: 4px 12px;
+      padding: 4px 10px;
       border: 1px solid rgba(255,255,255,0.15);
       text-align: center;
     }
 
     table.dhondt th { opacity: 0.7; font-weight: 600; }
     table.dhondt td.winner { font-weight: 700; }
-    table.dhondt td.winner.a { color: #818cf8; }
-    table.dhondt td.winner.b { color: #f472b6; }
   </style>
 </head>
 <body>
@@ -327,42 +351,8 @@
     <div class="info" id="wf-info"></div>
   </div>
 
-  <!-- Zähler + Namenslisten -->
-  <div class="counters">
-    <div class="counter-card a">
-      <div class="card-label">Liste 1</div>
-      <div class="count" id="count-a">0</div>
-      <div class="buttons">
-        <button class="minus" onclick="update('a', -1)">−</button>
-        <button class="plus"  onclick="update('a', +1)">+</button>
-      </div>
-      <button class="reset" onclick="resetCount('a')">Zurücksetzen</button>
-      <input type="number" class="count-input" id="input-a" min="0" value="0" oninput="setCount('a', this.value)">
-      <div class="name-list-section">
-        <h3>Kandidat:innen (Reihenfolge = Listenplatz)</h3>
-        <textarea id="names-a" oninput="renderAll()"
-          placeholder="Anna Schmidt, w&#10;Max Müller, m&#10;Lena Meier, w&#10;…"></textarea>
-        <div class="hint">Format: Name, m oder w (pro Zeile)</div>
-      </div>
-    </div>
-
-    <div class="counter-card b">
-      <div class="card-label">Liste 2</div>
-      <div class="count" id="count-b">0</div>
-      <div class="buttons">
-        <button class="minus" onclick="update('b', -1)">−</button>
-        <button class="plus"  onclick="update('b', +1)">+</button>
-      </div>
-      <button class="reset" onclick="resetCount('b')">Zurücksetzen</button>
-      <input type="number" class="count-input" id="input-b" min="0" value="0" oninput="setCount('b', this.value)">
-      <div class="name-list-section">
-        <h3>Kandidat:innen (Reihenfolge = Listenplatz)</h3>
-        <textarea id="names-b" oninput="renderAll()"
-          placeholder="Tom Weber, m&#10;Sara Koch, w&#10;Jan Braun, m&#10;…"></textarea>
-        <div class="hint">Format: Name, m oder w (pro Zeile)</div>
-      </div>
-    </div>
-  </div>
+  <!-- Zähler + Namenslisten (dynamisch) -->
+  <div class="counters" id="counters-container"></div>
 
   <!-- Ergebnisse -->
   <div class="results" id="results">
@@ -376,38 +366,123 @@
 
   <script>
     const TOTAL_SEATS = 9;
-    const counts = { a: 0, b: 0 };
 
-    function update(id, delta) {
-      counts[id] += delta;
-      if (counts[id] < 0) counts[id] = 0;
+    // Farben-Palette für Listen
+    const COLORS = [
+      { main: '#6366f1', dark: '#4338ca', shadow: 'rgba(99,102,241,0.3)',  text: '#818cf8' },
+      { main: '#ec4899', dark: '#be185d', shadow: 'rgba(236,72,153,0.3)',  text: '#f472b6' },
+      { main: '#10b981', dark: '#047857', shadow: 'rgba(16,185,129,0.3)',  text: '#34d399' },
+      { main: '#f59e0b', dark: '#b45309', shadow: 'rgba(245,158,11,0.3)',  text: '#fbbf24' },
+      { main: '#8b5cf6', dark: '#6d28d9', shadow: 'rgba(139,92,246,0.3)', text: '#a78bfa' },
+      { main: '#ef4444', dark: '#b91c1c', shadow: 'rgba(239,68,68,0.3)',   text: '#f87171' },
+      { main: '#06b6d4', dark: '#0e7490', shadow: 'rgba(6,182,212,0.3)',   text: '#22d3ee' },
+      { main: '#84cc16', dark: '#4d7c0f', shadow: 'rgba(132,204,22,0.3)',  text: '#a3e635' },
+    ];
+
+    let lists = [
+      { id: 0, votes: 0, names: '' },
+      { id: 1, votes: 0, names: '' },
+    ];
+    let nextId = 2;
+
+    function getColor(idx) {
+      return COLORS[idx % COLORS.length];
+    }
+
+    function addList() {
+      lists.push({ id: nextId++, votes: 0, names: '' });
+      rebuildCards();
+      renderAll();
+    }
+
+    function removeList(id) {
+      if (lists.length <= 2) return;
+      lists = lists.filter(l => l.id !== id);
+      rebuildCards();
+      renderAll();
+    }
+
+    function saveNamesFromDOM() {
+      for (const l of lists) {
+        const ta = document.getElementById('names-' + l.id);
+        if (ta) l.names = ta.value;
+      }
+    }
+
+    function rebuildCards() {
+      saveNamesFromDOM();
+      const container = document.getElementById('counters-container');
+      let html = '';
+
+      lists.forEach((l, idx) => {
+        const c = getColor(idx);
+        const nr = idx + 1;
+        const removeBtn = lists.length > 2
+          ? `<button class="btn-remove-list" onclick="removeList(${l.id})" title="Liste entfernen">✕</button>`
+          : '';
+
+        html += `
+          <div class="counter-card" style="box-shadow: 0 8px 32px ${c.shadow};">
+            ${removeBtn}
+            <div class="card-label" style="color:${c.text}">Liste ${nr}</div>
+            <div class="count" id="count-${l.id}">${l.votes}</div>
+            <div class="buttons">
+              <button class="minus" style="background:${c.dark}" onclick="updateVote(${l.id}, -1)">−</button>
+              <button class="plus"  style="background:${c.main}" onclick="updateVote(${l.id}, +1)">+</button>
+            </div>
+            <button class="reset" onclick="resetVote(${l.id})">Zurücksetzen</button>
+            <input type="number" class="count-input" id="input-${l.id}" min="0" value="${l.votes}" oninput="setVote(${l.id}, this.value)">
+            <div class="name-list-section">
+              <h3>Kandidat:innen (Listenplatz-Reihenfolge)</h3>
+              <textarea id="names-${l.id}" oninput="renderAll()"
+                placeholder="Anna Schmidt, w&#10;Max Müller, m&#10;Lena Meier, w&#10;…">${l.names}</textarea>
+              <div class="hint">Format: Name, m oder w (pro Zeile)</div>
+            </div>
+          </div>`;
+      });
+
+      html += `
+        <div class="add-list-card" onclick="addList()">
+          <button>＋ Liste hinzufügen</button>
+        </div>`;
+
+      container.innerHTML = html;
+    }
+
+    function getList(id) { return lists.find(l => l.id === id); }
+
+    function updateVote(id, delta) {
+      const l = getList(id);
+      l.votes = Math.max(0, l.votes + delta);
       syncDisplay(id);
       renderAll();
     }
 
-    function resetCount(id) {
-      counts[id] = 0;
+    function resetVote(id) {
+      getList(id).votes = 0;
       syncDisplay(id);
       renderAll();
     }
 
-    function setCount(id, val) {
-      counts[id] = Math.max(0, parseInt(val) || 0);
-      document.getElementById('count-' + id).textContent = counts[id];
+    function setVote(id, val) {
+      getList(id).votes = Math.max(0, parseInt(val) || 0);
+      document.getElementById('count-' + id).textContent = getList(id).votes;
       renderAll();
     }
 
     function syncDisplay(id) {
+      const l = getList(id);
       const el = document.getElementById('count-' + id);
-      el.textContent = counts[id];
+      el.textContent = l.votes;
       el.classList.add('pop');
       setTimeout(() => el.classList.remove('pop'), 120);
-      document.getElementById('input-' + id).value = counts[id];
+      document.getElementById('input-' + id).value = l.votes;
     }
 
     function parseCandidates(id) {
-      const raw = document.getElementById('names-' + id).value;
-      return raw.split('\n')
+      const el = document.getElementById('names-' + id);
+      if (!el) return [];
+      return el.value.split('\n')
         .map(line => line.trim())
         .filter(line => line.length > 0)
         .map(line => {
@@ -427,54 +502,45 @@
       let minGender, minCount;
       if (m < w) { minGender = 'm'; minCount = m; }
       else if (w < m) { minGender = 'w'; minCount = w; }
-      else { minGender = null; minCount = 0; } // gleich → keine Minderheit
+      else { minGender = null; minCount = 0; }
 
-      // §15 Abs. 2 BetrVG: mathematisch runden
       const minSeats = minGender ? Math.round((minCount / total) * TOTAL_SEATS) : 0;
       return { minGender, minSeats, m, w, total };
     }
 
-    function dhondt(votesA, votesB, seats) {
-      const result = { a: 0, b: 0 };
+    function dhondt(listsData, seats) {
+      const seatCounts = listsData.map(() => 0);
       const rounds = [];
 
-      for (let i = 0; i < seats; i++) {
-        const qA = votesA / (result.a + 1);
-        const qB = votesB / (result.b + 1);
-        let winner;
-        if (qA > qB) winner = 'a';
-        else if (qB > qA) winner = 'b';
-        else winner = result.a <= result.b ? 'a' : 'b';
-        result[winner]++;
-        rounds.push({ qA, qB, winner });
+      for (let r = 0; r < seats; r++) {
+        const quotients = listsData.map((l, i) => l.votes / (seatCounts[i] + 1));
+        let maxQ = -1, winnerIdx = 0;
+        quotients.forEach((q, i) => {
+          if (q > maxQ || (q === maxQ && seatCounts[i] < seatCounts[winnerIdx])) {
+            maxQ = q;
+            winnerIdx = i;
+          }
+        });
+        seatCounts[winnerIdx]++;
+        rounds.push({ quotients: [...quotients], winnerIdx });
       }
-      return { result, rounds };
+      return { seatCounts, rounds };
     }
 
-    function allocateSeats(dhondtResult, candidatesA, candidatesB, minorityInfo) {
-      const seatsA = dhondtResult.result.a;
-      const seatsB = dhondtResult.result.b;
-
-      // Kandidaten nach Listenplatz zuweisen
+    function allocateSeats(seatCounts, allCandidates, minorityInfo) {
       let elected = [];
-      for (let i = 0; i < seatsA; i++) {
-        elected.push({
-          list: 'a',
-          candidate: candidatesA[i] || { name: `Listenplatz ${i+1}`, gender: '?' },
-          seatIndex: i,
-          swapped: false
-        });
-      }
-      for (let i = 0; i < seatsB; i++) {
-        elected.push({
-          list: 'b',
-          candidate: candidatesB[i] || { name: `Listenplatz ${i+1}`, gender: '?' },
-          seatIndex: i,
-          swapped: false
-        });
-      }
+      seatCounts.forEach((count, listIdx) => {
+        const candidates = allCandidates[listIdx];
+        for (let i = 0; i < count; i++) {
+          elected.push({
+            listIdx,
+            candidate: candidates[i] || { name: `Listenplatz ${i+1}`, gender: '?' },
+            seatIndex: i,
+            swapped: false
+          });
+        }
+      });
 
-      // Minderheitengeschlechterregelung
       if (!minorityInfo.minGender || minorityInfo.minSeats === 0) {
         return { elected, adjustments: 0 };
       }
@@ -483,11 +549,8 @@
       let mgSeated = elected.filter(e => e.candidate.gender === mg).length;
       let adjustments = 0;
 
-      // Solange nicht genug Minderheitengeschlecht vertreten, tauschen
       while (mgSeated < minorityInfo.minSeats) {
-        // Finde den letzten Sitz (höchster Listenplatz) mit Mehrheitsgeschlecht
-        let swapTarget = null;
-        let maxIdx = -1;
+        let swapTarget = null, maxIdx = -1;
         for (const e of elected) {
           if (!e.swapped && e.candidate.gender !== mg && e.candidate.gender !== '?') {
             if (e.seatIndex >= maxIdx) {
@@ -498,10 +561,9 @@
         }
         if (!swapTarget) break;
 
-        // Finde nächsten verfügbaren Kandidaten des Minderheitengeschlechts auf derselben Liste
-        const candidates = swapTarget.list === 'a' ? candidatesA : candidatesB;
+        const candidates = allCandidates[swapTarget.listIdx];
         const alreadyElected = new Set(
-          elected.filter(e => e.list === swapTarget.list).map(e => e.seatIndex)
+          elected.filter(e => e.listIdx === swapTarget.listIdx).map(e => e.seatIndex)
         );
 
         let replacement = null;
@@ -511,8 +573,7 @@
             break;
           }
         }
-
-        if (!replacement) break; // kein passender Ersatz auf dieser Liste
+        if (!replacement) break;
 
         swapTarget.candidate = replacement.candidate;
         swapTarget.seatIndex = replacement.index;
@@ -525,9 +586,9 @@
     }
 
     function renderAll() {
-      const noVotes = counts.a === 0 && counts.b === 0;
-      const candidatesA = parseCandidates('a');
-      const candidatesB = parseCandidates('b');
+      const totalVotes = lists.reduce((s, l) => s + l.votes, 0);
+      const noVotes = totalVotes === 0;
+      const allCandidates = lists.map(l => parseCandidates(l.id));
       const minorityInfo = getMinoritySeatCount();
 
       // Workforce info
@@ -543,8 +604,8 @@
       }
 
       // d'Hondt
-      const dhondtData = dhondt(counts.a, counts.b, TOTAL_SEATS);
-      const { elected, adjustments } = allocateSeats(dhondtData, candidatesA, candidatesB, minorityInfo);
+      const dhondtData = dhondt(lists, TOTAL_SEATS);
+      const { elected, adjustments } = allocateSeats(dhondtData.seatCounts, allCandidates, minorityInfo);
 
       // Minority info box
       const miBox = document.getElementById('minority-info');
@@ -566,33 +627,38 @@
         for (let i = 0; i < TOTAL_SEATS; i++) sHtml += '<div class="seat empty"></div>';
       } else {
         for (const e of elected) {
+          const c = getColor(e.listIdx);
           const g = e.candidate.gender === 'm' ? '♂' : e.candidate.gender === 'w' ? '♀' : '';
-          sHtml += `<div class="seat ${e.list}" title="${e.candidate.name}">${g}</div>`;
+          sHtml += `<div class="seat" style="background:${c.main}" title="${e.candidate.name}">${g}</div>`;
         }
       }
       seatsRow.innerHTML = sHtml;
 
       // Summary
       const summary = document.getElementById('seats-summary');
-      summary.innerHTML = noVotes
-        ? '<span style="opacity:0.5">Stimmen eingeben …</span>'
-        : `<span class="a">Liste 1: <strong>${dhondtData.result.a}</strong> Sitze</span>` +
-          `<span class="b">Liste 2: <strong>${dhondtData.result.b}</strong> Sitze</span>`;
+      if (noVotes) {
+        summary.innerHTML = '<span style="opacity:0.5">Stimmen eingeben …</span>';
+      } else {
+        summary.innerHTML = lists.map((l, idx) => {
+          const c = getColor(idx);
+          return `<span style="color:${c.text}">Liste ${idx+1}: <strong>${dhondtData.seatCounts[idx]}</strong> Sitze</span>`;
+        }).join('');
+      }
 
       // Elected table
       const elDiv = document.getElementById('elected-list');
-      if (noVotes || (candidatesA.length === 0 && candidatesB.length === 0)) {
+      const hasCandidates = allCandidates.some(c => c.length > 0);
+      if (noVotes || !hasCandidates) {
         elDiv.innerHTML = '';
       } else {
         let tbl = '<h3>Gewählte Betriebsratsmitglieder</h3>';
         tbl += '<table class="elected-table"><tr><th>#</th><th>Name</th><th>Geschl.</th><th>Liste</th><th></th></tr>';
         elected.forEach((e, i) => {
           const cls = e.swapped ? ' class="swapped"' : '';
-          const listCls = e.list === 'a' ? 'list-a' : 'list-b';
-          const listName = e.list === 'a' ? 'Liste 1' : 'Liste 2';
+          const c = getColor(e.listIdx);
           const gLabel = e.candidate.gender === 'm' ? '♂ m' : e.candidate.gender === 'w' ? '♀ w' : e.candidate.gender;
           const note = e.swapped ? '<span class="swap-note">↑ Minderheitenregelung</span>' : '';
-          tbl += `<tr${cls}><td>${i+1}</td><td>${e.candidate.name}</td><td>${gLabel}</td><td class="${listCls}">${listName}</td><td>${note}</td></tr>`;
+          tbl += `<tr${cls}><td>${i+1}</td><td>${e.candidate.name}</td><td>${gLabel}</td><td style="color:${c.text}">Liste ${e.listIdx+1}</td><td>${note}</td></tr>`;
         });
         tbl += '</table>';
         elDiv.innerHTML = tbl;
@@ -601,16 +667,25 @@
       // d'Hondt table
       const table = document.getElementById('dhondt-table');
       if (noVotes) { table.innerHTML = ''; return; }
-      let t = '<tr><th>Runde</th><th>Liste 1</th><th>Liste 2</th><th>Sitz →</th></tr>';
+      let t = '<tr><th>Runde</th>';
+      lists.forEach((_, idx) => { t += `<th>Liste ${idx+1}</th>`; });
+      t += '<th>Sitz →</th></tr>';
       dhondtData.rounds.forEach((r, i) => {
-        const wA = r.winner === 'a' ? ' winner a' : '';
-        const wB = r.winner === 'b' ? ' winner b' : '';
-        const label = r.winner === 'a' ? 'Liste 1' : 'Liste 2';
-        t += `<tr><td>${i+1}</td><td class="${wA}">${r.qA.toFixed(1)}</td><td class="${wB}">${r.qB.toFixed(1)}</td><td class="${r.winner === 'a' ? 'winner a' : 'winner b'}">${label}</td></tr>`;
+        t += `<tr><td>${i+1}</td>`;
+        r.quotients.forEach((q, idx) => {
+          const isWinner = idx === r.winnerIdx;
+          const c = getColor(idx);
+          const cls = isWinner ? ` class="winner" style="color:${c.text}"` : '';
+          t += `<td${cls}>${q.toFixed(1)}</td>`;
+        });
+        const wc = getColor(r.winnerIdx);
+        t += `<td class="winner" style="color:${wc.text}">Liste ${r.winnerIdx+1}</td></tr>`;
       });
       table.innerHTML = t;
     }
 
+    // Init
+    rebuildCards();
     renderAll();
   </script>
 
