@@ -4,6 +4,8 @@ Eine Web-App zur Auszählung von Betriebsratswahlen mit zwei Vorschlagslisten.
 
 **👉 [Live-App öffnen](https://sandraahlgrimm.github.io/zaehler/)**
 
+![Screenshot der Betriebsratswahl Zähler App](screenshot.png)
+
 ## Features
 
 - **Stimmenzähler** für zwei Listen – per Klick (+/−) oder direkte Zahleneingabe
