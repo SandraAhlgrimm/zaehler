@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Betriebsratswahl – Zähler App</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      color: #fff;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    /* ── Belegschaft ── */
+    .workforce {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 1.2rem 2rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .workforce label {
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .workforce input[type=number] {
+      width: 70px;
+      padding: 0.4rem 0.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+
+    .workforce .info {
+      font-size: 0.85rem;
+      opacity: 0.7;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* ── Counter cards ── */
+    .counters {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .counter-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 1.5rem;
+      width: 300px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .counter-card:hover { transform: translateY(-4px); }
+    .counter-card.a { box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3); }
+    .counter-card.b { box-shadow: 0 8px 32px rgba(236, 72, 153, 0.3); }
+
+    .card-label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    .counter-card.a .card-label { color: #818cf8; }
+    .counter-card.b .card-label { color: #f472b6; }
+
+    .count {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+      font-variant-numeric: tabular-nums;
+      transition: transform 0.1s;
+    }
+
+    .count.pop { transform: scale(1.2); }
+
+    .buttons {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 0.6rem 1.2rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+      color: #fff;
+    }
+
+    button:active { transform: scale(0.92); }
+
+    .counter-card.a button.plus  { background: #6366f1; }
+    .counter-card.a button.minus { background: #4338ca; }
+    .counter-card.b button.plus  { background: #ec4899; }
+    .counter-card.b button.minus { background: #be185d; }
+
+    button.reset {
+      background: rgba(255, 255, 255, 0.12);
+      font-size: 0.8rem;
+      padding: 0.4rem 0.8rem;
+      margin-top: 0.5rem;
+    }
+
+    button.reset:hover { background: rgba(255,255,255,0.2); }
+
+    .count-input {
+      width: 80px;
+      padding: 0.3rem 0.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 1rem;
+      text-align: center;
+      margin-top: 0.3rem;
+    }
+
+    /* ── Name lists ── */
+    .name-list-section {
+      margin-top: 1rem;
+      text-align: left;
+    }
+
+    .name-list-section h3 {
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+      opacity: 0.8;
+    }
+
+    .name-list-section textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 0.6rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.85rem;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .name-list-section textarea::placeholder { color: rgba(255,255,255,0.3); }
+
+    .name-list-section .hint {
+      font-size: 0.72rem;
+      opacity: 0.5;
+      margin-top: 0.3rem;
+    }
+
+    /* ── Results ── */
+    .results {
+      margin-top: 2rem;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 1.5rem 2rem;
+      text-align: center;
+      width: 100%;
+      max-width: 660px;
+    }
+
+    .results h2 {
+      font-size: 1.05rem;
+      letter-spacing: 1px;
+      margin-bottom: 0.8rem;
+      opacity: 0.85;
+    }
+
+    .minority-info {
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      padding: 0.6rem;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .minority-info .highlight { color: #fbbf24; font-weight: 600; }
+
+    .seats-row {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+
+    .seat {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.7rem;
+      transition: background 0.3s;
+      position: relative;
+    }
+
+    .seat.a { background: #6366f1; }
+    .seat.b { background: #ec4899; }
+    .seat.empty { background: rgba(255,255,255,0.1); }
+
+    .seats-summary {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 0.8rem;
+      font-size: 0.95rem;
+    }
+
+    .seats-summary .a { color: #818cf8; }
+    .seats-summary .b { color: #f472b6; }
+
+    /* ── Elected list ── */
+    .elected-list {
+      margin-top: 1.2rem;
+      text-align: left;
+    }
+
+    .elected-list h3 {
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+      opacity: 0.85;
+    }
+
+    .elected-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    .elected-table th, .elected-table td {
+      padding: 5px 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      text-align: left;
+    }
+
+    .elected-table th {
+      opacity: 0.7;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .elected-table td.list-a { color: #818cf8; }
+    .elected-table td.list-b { color: #f472b6; }
+    .elected-table tr.swapped { background: rgba(251,191,36,0.12); }
+    .elected-table .swap-note { color: #fbbf24; font-size: 0.75rem; }
+
+    /* ── d'Hondt table ── */
+    table.dhondt {
+      margin: 1rem auto 0;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    table.dhondt th, table.dhondt td {
+      padding: 4px 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      text-align: center;
+    }
+
+    table.dhondt th { opacity: 0.7; font-weight: 600; }
+    table.dhondt td.winner { font-weight: 700; }
+    table.dhondt td.winner.a { color: #818cf8; }
+    table.dhondt td.winner.b { color: #f472b6; }
+  </style>
+</head>
+<body>
+
+  <h1>🗳️ Betriebsratswahl – Zähler</h1>
+
+  <!-- Belegschaft -->
+  <div class="workforce">
+    <label>👨 Männliche Beschäftigte:
+      <input type="number" id="wf-m" min="0" value="0" oninput="renderAll()">
+    </label>
+    <label>👩 Weibliche Beschäftigte:
+      <input type="number" id="wf-w" min="0" value="0" oninput="renderAll()">
+    </label>
+    <div class="info" id="wf-info"></div>
+  </div>
+
+  <!-- Zähler + Namenslisten -->
+  <div class="counters">
+    <div class="counter-card a">
+      <div class="card-label">Liste 1</div>
+      <div class="count" id="count-a">0</div>
+      <div class="buttons">
+        <button class="minus" onclick="update('a', -1)">−</button>
+        <button class="plus"  onclick="update('a', +1)">+</button>
+      </div>
+      <button class="reset" onclick="resetCount('a')">Zurücksetzen</button>
+      <input type="number" class="count-input" id="input-a" min="0" value="0" oninput="setCount('a', this.value)">
+      <div class="name-list-section">
+        <h3>Kandidat:innen (Reihenfolge = Listenplatz)</h3>
+        <textarea id="names-a" oninput="renderAll()"
+          placeholder="Anna Schmidt, w&#10;Max Müller, m&#10;Lena Meier, w&#10;…"></textarea>
+        <div class="hint">Format: Name, m oder w (pro Zeile)</div>
+      </div>
+    </div>
+
+    <div class="counter-card b">
+      <div class="card-label">Liste 2</div>
+      <div class="count" id="count-b">0</div>
+      <div class="buttons">
+        <button class="minus" onclick="update('b', -1)">−</button>
+        <button class="plus"  onclick="update('b', +1)">+</button>
+      </div>
+      <button class="reset" onclick="resetCount('b')">Zurücksetzen</button>
+      <input type="number" class="count-input" id="input-b" min="0" value="0" oninput="setCount('b', this.value)">
+      <div class="name-list-section">
+        <h3>Kandidat:innen (Reihenfolge = Listenplatz)</h3>
+        <textarea id="names-b" oninput="renderAll()"
+          placeholder="Tom Weber, m&#10;Sara Koch, w&#10;Jan Braun, m&#10;…"></textarea>
+        <div class="hint">Format: Name, m oder w (pro Zeile)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ergebnisse -->
+  <div class="results" id="results">
+    <h2>Sitzverteilung (9 Sitze · d'Hondt)</h2>
+    <div class="minority-info" id="minority-info"></div>
+    <div class="seats-row" id="seats-row"></div>
+    <div class="seats-summary" id="seats-summary"></div>
+    <div class="elected-list" id="elected-list"></div>
+    <table class="dhondt" id="dhondt-table"></table>
+  </div>
+
+  <script>
+    const TOTAL_SEATS = 9;
+    const counts = { a: 0, b: 0 };
+
+    function update(id, delta) {
+      counts[id] += delta;
+      if (counts[id] < 0) counts[id] = 0;
+      syncDisplay(id);
+      renderAll();
+    }
+
+    function resetCount(id) {
+      counts[id] = 0;
+      syncDisplay(id);
+      renderAll();
+    }
+
+    function setCount(id, val) {
+      counts[id] = Math.max(0, parseInt(val) || 0);
+      document.getElementById('count-' + id).textContent = counts[id];
+      renderAll();
+    }
+
+    function syncDisplay(id) {
+      const el = document.getElementById('count-' + id);
+      el.textContent = counts[id];
+      el.classList.add('pop');
+      setTimeout(() => el.classList.remove('pop'), 120);
+      document.getElementById('input-' + id).value = counts[id];
+    }
+
+    function parseCandidates(id) {
+      const raw = document.getElementById('names-' + id).value;
+      return raw.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(line => {
+          const match = line.match(/^(.+?),\s*(m|w|d)\s*$/i);
+          if (!match) return null;
+          return { name: match[1].trim(), gender: match[2].toLowerCase() };
+        })
+        .filter(c => c !== null);
+    }
+
+    function getMinoritySeatCount() {
+      const m = parseInt(document.getElementById('wf-m').value) || 0;
+      const w = parseInt(document.getElementById('wf-w').value) || 0;
+      const total = m + w;
+      if (total === 0) return { minGender: null, minSeats: 0, m, w, total };
+
+      let minGender, minCount;
+      if (m < w) { minGender = 'm'; minCount = m; }
+      else if (w < m) { minGender = 'w'; minCount = w; }
+      else { minGender = null; minCount = 0; } // gleich → keine Minderheit
+
+      // §15 Abs. 2 BetrVG: mathematisch runden
+      const minSeats = minGender ? Math.round((minCount / total) * TOTAL_SEATS) : 0;
+      return { minGender, minSeats, m, w, total };
+    }
+
+    function dhondt(votesA, votesB, seats) {
+      const result = { a: 0, b: 0 };
+      const rounds = [];
+
+      for (let i = 0; i < seats; i++) {
+        const qA = votesA / (result.a + 1);
+        const qB = votesB / (result.b + 1);
+        let winner;
+        if (qA > qB) winner = 'a';
+        else if (qB > qA) winner = 'b';
+        else winner = result.a <= result.b ? 'a' : 'b';
+        result[winner]++;
+        rounds.push({ qA, qB, winner });
+      }
+      return { result, rounds };
+    }
+
+    function allocateSeats(dhondtResult, candidatesA, candidatesB, minorityInfo) {
+      const seatsA = dhondtResult.result.a;
+      const seatsB = dhondtResult.result.b;
+
+      // Kandidaten nach Listenplatz zuweisen
+      let elected = [];
+      for (let i = 0; i < seatsA; i++) {
+        elected.push({
+          list: 'a',
+          candidate: candidatesA[i] || { name: `Listenplatz ${i+1}`, gender: '?' },
+          seatIndex: i,
+          swapped: false
+        });
+      }
+      for (let i = 0; i < seatsB; i++) {
+        elected.push({
+          list: 'b',
+          candidate: candidatesB[i] || { name: `Listenplatz ${i+1}`, gender: '?' },
+          seatIndex: i,
+          swapped: false
+        });
+      }
+
+      // Minderheitengeschlechterregelung
+      if (!minorityInfo.minGender || minorityInfo.minSeats === 0) {
+        return { elected, adjustments: 0 };
+      }
+
+      const mg = minorityInfo.minGender;
+      let mgSeated = elected.filter(e => e.candidate.gender === mg).length;
+      let adjustments = 0;
+
+      // Solange nicht genug Minderheitengeschlecht vertreten, tauschen
+      while (mgSeated < minorityInfo.minSeats) {
+        // Finde den letzten Sitz (höchster Listenplatz) mit Mehrheitsgeschlecht
+        let swapTarget = null;
+        let maxIdx = -1;
+        for (const e of elected) {
+          if (!e.swapped && e.candidate.gender !== mg && e.candidate.gender !== '?') {
+            if (e.seatIndex >= maxIdx) {
+              maxIdx = e.seatIndex;
+              swapTarget = e;
+            }
+          }
+        }
+        if (!swapTarget) break;
+
+        // Finde nächsten verfügbaren Kandidaten des Minderheitengeschlechts auf derselben Liste
+        const candidates = swapTarget.list === 'a' ? candidatesA : candidatesB;
+        const alreadyElected = new Set(
+          elected.filter(e => e.list === swapTarget.list).map(e => e.seatIndex)
+        );
+
+        let replacement = null;
+        for (let i = 0; i < candidates.length; i++) {
+          if (!alreadyElected.has(i) && candidates[i].gender === mg) {
+            replacement = { index: i, candidate: candidates[i] };
+            break;
+          }
+        }
+
+        if (!replacement) break; // kein passender Ersatz auf dieser Liste
+
+        swapTarget.candidate = replacement.candidate;
+        swapTarget.seatIndex = replacement.index;
+        swapTarget.swapped = true;
+        adjustments++;
+        mgSeated++;
+      }
+
+      return { elected, adjustments };
+    }
+
+    function renderAll() {
+      const noVotes = counts.a === 0 && counts.b === 0;
+      const candidatesA = parseCandidates('a');
+      const candidatesB = parseCandidates('b');
+      const minorityInfo = getMinoritySeatCount();
+
+      // Workforce info
+      const wfInfo = document.getElementById('wf-info');
+      if (minorityInfo.total > 0 && minorityInfo.minGender) {
+        const pct = ((minorityInfo.minGender === 'm' ? minorityInfo.m : minorityInfo.w) / minorityInfo.total * 100).toFixed(1);
+        const label = minorityInfo.minGender === 'm' ? 'Männer' : 'Frauen';
+        wfInfo.innerHTML = `Minderheitengeschlecht: <span style="color:#fbbf24;font-weight:600">${label} (${pct}%)</span> → mind. <span style="color:#fbbf24;font-weight:600">${minorityInfo.minSeats} von ${TOTAL_SEATS} Sitzen</span>`;
+      } else if (minorityInfo.total > 0) {
+        wfInfo.textContent = 'Geschlechterverteilung ist ausgeglichen – keine Minderheitenregelung nötig.';
+      } else {
+        wfInfo.textContent = 'Belegschaftszahlen eingeben für Minderheitengeschlechterregelung (§15 Abs. 2 BetrVG)';
+      }
+
+      // d'Hondt
+      const dhondtData = dhondt(counts.a, counts.b, TOTAL_SEATS);
+      const { elected, adjustments } = allocateSeats(dhondtData, candidatesA, candidatesB, minorityInfo);
+
+      // Minority info box
+      const miBox = document.getElementById('minority-info');
+      if (noVotes) {
+        miBox.innerHTML = '';
+      } else if (adjustments > 0) {
+        miBox.innerHTML = `⚠️ <span class="highlight">${adjustments} Nachrücker-Tausch</span> für Minderheitengeschlechterregelung`;
+      } else if (minorityInfo.minGender && minorityInfo.minSeats > 0) {
+        const mgSeated = elected.filter(e => e.candidate.gender === minorityInfo.minGender).length;
+        miBox.innerHTML = `✅ Minderheitengeschlecht hat <span class="highlight">${mgSeated} Sitze</span> (Minimum: ${minorityInfo.minSeats}) – Regelung erfüllt`;
+      } else {
+        miBox.innerHTML = '';
+      }
+
+      // Seat circles
+      const seatsRow = document.getElementById('seats-row');
+      let sHtml = '';
+      if (noVotes) {
+        for (let i = 0; i < TOTAL_SEATS; i++) sHtml += '<div class="seat empty"></div>';
+      } else {
+        for (const e of elected) {
+          const g = e.candidate.gender === 'm' ? '♂' : e.candidate.gender === 'w' ? '♀' : '';
+          sHtml += `<div class="seat ${e.list}" title="${e.candidate.name}">${g}</div>`;
+        }
+      }
+      seatsRow.innerHTML = sHtml;
+
+      // Summary
+      const summary = document.getElementById('seats-summary');
+      summary.innerHTML = noVotes
+        ? '<span style="opacity:0.5">Stimmen eingeben …</span>'
+        : `<span class="a">Liste 1: <strong>${dhondtData.result.a}</strong> Sitze</span>` +
+          `<span class="b">Liste 2: <strong>${dhondtData.result.b}</strong> Sitze</span>`;
+
+      // Elected table
+      const elDiv = document.getElementById('elected-list');
+      if (noVotes || (candidatesA.length === 0 && candidatesB.length === 0)) {
+        elDiv.innerHTML = '';
+      } else {
+        let tbl = '<h3>Gewählte Betriebsratsmitglieder</h3>';
+        tbl += '<table class="elected-table"><tr><th>#</th><th>Name</th><th>Geschl.</th><th>Liste</th><th></th></tr>';
+        elected.forEach((e, i) => {
+          const cls = e.swapped ? ' class="swapped"' : '';
+          const listCls = e.list === 'a' ? 'list-a' : 'list-b';
+          const listName = e.list === 'a' ? 'Liste 1' : 'Liste 2';
+          const gLabel = e.candidate.gender === 'm' ? '♂ m' : e.candidate.gender === 'w' ? '♀ w' : e.candidate.gender;
+          const note = e.swapped ? '<span class="swap-note">↑ Minderheitenregelung</span>' : '';
+          tbl += `<tr${cls}><td>${i+1}</td><td>${e.candidate.name}</td><td>${gLabel}</td><td class="${listCls}">${listName}</td><td>${note}</td></tr>`;
+        });
+        tbl += '</table>';
+        elDiv.innerHTML = tbl;
+      }
+
+      // d'Hondt table
+      const table = document.getElementById('dhondt-table');
+      if (noVotes) { table.innerHTML = ''; return; }
+      let t = '<tr><th>Runde</th><th>Liste 1</th><th>Liste 2</th><th>Sitz →</th></tr>';
+      dhondtData.rounds.forEach((r, i) => {
+        const wA = r.winner === 'a' ? ' winner a' : '';
+        const wB = r.winner === 'b' ? ' winner b' : '';
+        const label = r.winner === 'a' ? 'Liste 1' : 'Liste 2';
+        t += `<tr><td>${i+1}</td><td class="${wA}">${r.qA.toFixed(1)}</td><td class="${wB}">${r.qB.toFixed(1)}</td><td class="${r.winner === 'a' ? 'winner a' : 'winner b'}">${label}</td></tr>`;
+      });
+      table.innerHTML = t;
+    }
+
+    renderAll();
+  </script>
+
+</body>
+</html>
